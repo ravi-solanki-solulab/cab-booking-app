@@ -22,19 +22,19 @@
 ### **API endpoints**
  
  POST http://localhost:5000/auth/register 
-  - user can register themself by using this endpoint
+  - user can register themself by using this endpoint.
  
  POST http://localhost:5000/auth/login
-  - user can login using email and password
+  - user can login using email and password.
   
  GET http://localhost:5000/bookings
-  - list all the past bookings of perticular user 
+  - list all the past bookings of perticular user.
 
  POST http://localhost:5000/nearby
   - list all the cabs which are available to accept the booking request withing specified distance.
   
  POST http://localhost:5000/book
-  - send req to book a cab from source to destination
+  - send req to book a cab from source to destination.
 
 
 ### **swagger link**
@@ -48,5 +48,62 @@
 ![cab-booking-schema](https://user-images.githubusercontent.com/110447114/183032384-448223a5-1a18-4246-bdbe-9985dd5ebbe2.jpg)
 
 
+### In Database we will have 3 collections which are :
+### 1.users
+ Document sample in **'users'** collection
+ 
+ 	{
+  	"_id" : ObjectId("62ebc95d1b1478958da9eedd"),
+    	"firstName" : "test",
+    	"lastName" : "test",
+    	"password" : "$2b$10$nJuSJK0E0EhhXSfW4x.cHOm0HSbU51Qw44L1DxQpy/rfsjOjOKS3q",
+    	"email" : "test@gmail.com",
+    	"mobile" : "6767676767"
+       }
+
+### 2.cabs
+  Document sample in **'cabs'** collection :
+  
+  	{
+    	"_id" : ObjectId("62ea078134fc15533b6c37d9"),
+    	"title" : "i10",
+    	"driverName" : "Sam",
+    	"contact" : "987856****",
+    	"status" : "AVAILABLE",
+    	"location" : {
+        "type" : "Point",
+        	"coordinates" : [
+            		72.54687368135602,
+            		23.085965635261882
+        	]
+    	}
+      }
+
+### 3.bookings
+  Document sample in **'bookings'** collection
+   - field 'userId' in this collection is the reference of the field '_id' from 'users' collection.
+   - field 'cabId' in this collection is the reference of the field '_id' from 'cabs' collection.
+  
+	{
+    	"_id" : ObjectId("62ebc9f51b1478958da9eede"),
+    	"userId" : "62ebc95d1b1478958da9eedd",
+    	"cabId" : "62ea078134fc15533b6c37d9",
+    	"bookingAt" : ISODate("2022-08-04T13:30:29.910+0000"),
+    	"drop" : {
+        	"type" : "Point",
+        	"coordinates" : [
+			72.345622635261882
+            		23.876565635261882
+        	]
+    	},
+    	"pickup" : {
+        	"type" : "Point",
+        	"coordinates" : [
+			72.528567468736813,
+                	23.987645635261882
+		]
+		},
+    	"bookingStatus" : "COMPLETED"
+	}
 
 
