@@ -22,10 +22,10 @@
 ### **API endpoints**
  
  POST http://localhost:5000/auth/register 
-  - user can register themself by this endpoint
+  - user can register themself by using this endpoint
  
  POST http://localhost:5000/auth/login
-  - user login using email and password through enpoint
+  - user can login using email and password
   
  GET http://localhost:5000/bookings
   - list all the past bookings of perticular user 
@@ -34,7 +34,7 @@
   - list all the cabs which are available to accept the booking request withing specified distance.
   
  POST http://localhost:5000/book
-  - send req to book cab for source to destination
+  - send req to book a cab from source to destination
 
 
 ### **swagger link**
