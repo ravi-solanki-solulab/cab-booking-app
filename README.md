@@ -106,4 +106,7 @@
     	"bookingStatus" : "COMPLETED"
 	}
 
+### Postman collection of the application
+ 
+ [cab-booking.postman_collection.zip](https://github.com/ravi-solanki-solulab/cab-booking-app/files/9267891/cab-booking-postman-collection.postman_collection.zip)
 
