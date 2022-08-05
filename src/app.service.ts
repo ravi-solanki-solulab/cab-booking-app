@@ -34,7 +34,7 @@ export class AppService {
           maxDistance: nearbyCabDto.distance,
           query: { status: CAB_STATUS.AVAILABLE },
           spherical: true,
-          isActive: true,
+          isActive: true
         },
       },
     ]
@@ -82,15 +82,19 @@ export class AppService {
     return sendBooking.insertedId.toString();
   }
 
-  async pastBookings(userId: string): Promise<BookingRo[]> {
-
+  async pastBookings(userId: string, pageNumber, pageSize = 3): Promise<BookingRo[]> {
     //aggregation pipeline with all stages to get user's past bokkings 
     const pipeline: any = [
       {
-        "$match": { $and: [{ "userId": userId, }, { "bookingStatus": BOOKING_STATUS.COMPLETED }] }
+        $match: {
+          $and: [
+            { "userId": userId, },
+            { "bookingStatus": BOOKING_STATUS.COMPLETED }
+          ]
+        }
       },
       {
-        "$project": {
+        $project: {
           _id: 1,
           bookingAt: 1,
           cabId: { $toObjectId: '$cabId' },
@@ -100,25 +104,35 @@ export class AppService {
       },
 
       {
-        "$lookup": {
+        $lookup: {
           from: 'cabs',
           localField: 'cabId',
-          pipeline: [{ $project: { _id: 1, driverName: 1, contact: 1, title: 1 } }],
+          pipeline: [
+            {
+              $project:
+                { _id: 1, driverName: 1, contact: 1, title: 1 }
+            }
+          ],
           foreignField: '_id',
           as: 'cabDetails',
         },
       },
       {
-        "$unwind": "$cabDetails"
+        $unwind: "$cabDetails"
       },
       {
-        "$project": { "cabId": 0 }
+        $project: { "cabId": 0 }
+      }
+      , {
+        $skip: (pageNumber - 1) * pageSize
+      },
+      {
+        $limit: pageSize
       }
     ]
-    const bookingData: BookingRo[] = await this.connection.db.collection(COLLECTION_NAMES.BOOKINGS).aggregate(
 
-    ).toArray();
-    
+    const bookingData: BookingRo[] = await this.connection.db.collection(COLLECTION_NAMES.BOOKINGS).aggregate(pipeline).toArray();
+
     return bookingData;
   }
 

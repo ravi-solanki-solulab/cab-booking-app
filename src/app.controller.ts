@@ -26,11 +26,13 @@ export class AppController {
   @ApiResponse({ status: 200, description: 'Successful.' })
   @ApiOperation({ summary: 'Endpoint to get list of past bookings for perticular user.' })
   @Get('bookings')
+  @ApiQuery({name: 'pageNumber', required : false })
+  @ApiQuery({name: 'pageSize', required: false})
   @UseGuards(AuthGuard('jwt'))
-  async bookings(@Request() req: any): Promise<ResponseRo<BookingRo[]>> {
+  async bookings(@Request() req: any, @Query('pageNumber') pageNumber: any = 1, @Query('pageSize') pageSize: any = 2): Promise<ResponseRo<BookingRo[]>> {
     const tokenData = decode(req.headers.authorization.replace('Bearer ', ''), { json: true }); //Accesing jwt-token from auth-header
-    
-    const res: BookingRo[] = await this.appService.pastBookings(tokenData._id);
+
+    const res: BookingRo[] = await this.appService.pastBookings(tokenData._id, parseInt(pageNumber),parseInt(pageSize));
     
     return {
       message: "List Of Bookings",
