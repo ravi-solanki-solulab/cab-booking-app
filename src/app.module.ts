@@ -9,11 +9,15 @@ import { AuthModule } from './auth/auth.module';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { AuthService } from './auth/auth.service';
 import { ConfigModule } from '@nestjs/config';
+import { BookingSchema } from './schemas/bookings.shema';
+import { CabSchema } from './schemas/cab.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot('mongodb://localhost/cab'),
+    MongooseModule.forRoot(process.env.MONGO_URL),
+    MongooseModule.forFeature([{ name : 'Booking', schema: BookingSchema}]),
+    MongooseModule.forFeature([{name: 'Cab', schema: CabSchema}]),
     HttpModule,
     UserModule,
     AuthModule,

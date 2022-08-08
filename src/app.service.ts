@@ -1,23 +1,21 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-//import { User, userDocument } from './schemas/user.schema';
 import { Connection, isObjectIdOrHexString, Model } from "mongoose";
-import { UserDto } from './dtos/user.dto';
 import { HttpService } from '@nestjs/axios';
-import { lastValueFrom, map, ObjectUnsubscribedError, tap } from 'rxjs';
-import { response } from 'express';
 import { BookingRo } from './ros/bookin.ro';
 import { NearbyCabDto } from './dtos/nearby.dto';
 import { NearbyCabRo } from './ros/nearbyCab.ro';
-import { JwtService } from '@nestjs/jwt';
 import { BookingReqDto } from './dtos/booking.dto';
-import { ObjectId } from 'mongodb';
-import { BOOKING_STATUS, CAB_STATUS, COLLECTION_NAMES } from './constants/status';
+import { BOOKING_STATUS, CAB_STATUS } from './constants/status';
+import { bookingDocument } from './schemas/bookings.shema';
+import { cabDocument } from './schemas/cab.schema';
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectConnection() private connection: Connection,
+    @InjectModel('Booking') private bookingModel: Model<bookingDocument>,
+    @InjectModel('Cab') private cabModel : Model<cabDocument>,
     private readonly httpService: HttpService) { }
 
   async getHello() {
@@ -38,7 +36,8 @@ export class AppService {
         },
       },
     ]
-    const result: any[] = await this.connection.db.collection(COLLECTION_NAMES.CABS).aggregate(pipeline).toArray();
+    
+    const result : any[] = await this.cabModel.aggregate(pipeline);
 
     const cabList: NearbyCabRo[] = [];
     //Getting only lat-long and other required values from the result   
@@ -59,7 +58,7 @@ export class AppService {
   }
 
   async bookCab(bookingReq: BookingReqDto, userId: string): Promise<string> {
-    const cab = await this.connection.db.collection(COLLECTION_NAMES.CABS).findOne({ _id: new ObjectId(bookingReq.cabId) });
+    const cab = await this.cabModel.findById(bookingReq.cabId); 
 
     //Check id cab is AVAILABLE to accept the booking request
     if (cab.status != CAB_STATUS.AVAILABLE) {
@@ -69,17 +68,19 @@ export class AppService {
     const pickup = this.GetGeoLocation(bookingReq.pickup.latitude, bookingReq.pickup.longitude);
     const drop = this.GetGeoLocation(bookingReq.drop.latitude, bookingReq.drop.longitude)
 
-    //Inserting booking request in 'bookinga' collection
-    const sendBooking = await this.connection.db.collection(COLLECTION_NAMES.BOOKINGS).insertOne({
+    const recordTobeAdded = {
       userId: userId,
       cabId: bookingReq.cabId,
       bookingAt: new Date(),
       drop: drop,
       pickup: pickup,
       bookingStatus: BOOKING_STATUS.PENDING
-    })
+    }
 
-    return sendBooking.insertedId.toString();
+    const bookingRecord = new this.bookingModel(recordTobeAdded);
+    const sendBooking = await bookingRecord.save();
+
+    return sendBooking._id;
   }
 
   async pastBookings(userId: string, pageNumber, pageSize = 3): Promise<BookingRo[]> {
@@ -131,8 +132,7 @@ export class AppService {
       }
     ]
 
-    const bookingData: BookingRo[] = await this.connection.db.collection(COLLECTION_NAMES.BOOKINGS).aggregate(pipeline).toArray();
-
+    const bookingData: BookingRo[] = await this.bookingModel.aggregate(pipeline);
     return bookingData;
   }
 
