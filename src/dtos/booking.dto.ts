@@ -1,28 +1,27 @@
 import { Type } from 'class-transformer';
 import { ApiProperty } from "@nestjs/swagger";
-import { IsLatLong } from '@nestjs/class-validator';
-import { IsMongoId, ValidateNested } from 'class-validator';
+import { IsLatitude, IsLongitude, IsMongoId, ValidateNested } from 'class-validator';
 
-export class LatLong { 
+export class LatLong {
     @ApiProperty()
-    @IsLatLong()
-    latitude : number;
+    @IsLatitude()
+    latitude: number;
 
     @ApiProperty()
-    @IsLatLong()
+    @IsLongitude()
     longitude: number;
-} 
+}
 
-export class BookingReqDto { 
+export class BookingReqDto {
     @ApiProperty()
     @IsMongoId()
-    cabId : string;
+    cabId: string;
 
     @ApiProperty()
     @ValidateNested({ each: true })
     @Type(() => LatLong)
-    pickup : LatLong;
-    
+    pickup: LatLong;
+
     @ApiProperty()
     @ValidateNested({ each: true })
     @Type(() => LatLong)

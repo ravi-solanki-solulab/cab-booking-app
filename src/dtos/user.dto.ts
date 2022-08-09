@@ -1,4 +1,4 @@
-import { IsString, isString } from "@nestjs/class-validator";
+import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UserDto {
